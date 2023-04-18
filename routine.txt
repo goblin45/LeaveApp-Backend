@@ -1,0 +1,15 @@
+Done - 
+
+1) create package.json with "npm init -y"
+	a) change "name", "main" to "myServer.js" and "description"
+	b) change in "scripts" - 
+		i) "start": "node myServer"
+		ii) "dev": "nodemon myServer"
+2) install express with "npm i express"
+3) install nodemon with "npm i nodemon -D"
+4) create a file named ".gitignore"
+5) create a file named "myServer.js"
+6) create "/public/css/style.css"
+7) create "/routes/root.js"
+8) create "views/index.html"
+9) create "404.html" in "/views"
