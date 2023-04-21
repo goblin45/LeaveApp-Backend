@@ -13,3 +13,7 @@ Done -
 7) create "/routes/root.js"
 8) create "views/index.html"
 9) create "404.html" in "/views"
+
+10) installed mongoose
+11) created data models - Student.js, Admin.js, Mail.js, School.js
+12) 
