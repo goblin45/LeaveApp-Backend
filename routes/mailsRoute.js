@@ -8,6 +8,9 @@ router.route('/')
     .patch(mailsController.updateMail)
     .delete(mailsController.deleteMail)
 
+router.route('/find')
+    .post(mailsController.getMail)
+
 router.route('/admins')
     .post(mailsController.getReceivedMails)
     .patch(mailsController.updateMailStatus)

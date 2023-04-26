@@ -2,19 +2,6 @@ const School = require('../models/School')
 const Admin = require('../models/Admin')
 const asynchandler = require('express-async-handler')
 
-//@desc Get all schools
-//@route POST /schools
-//access Private 
-const getAllSchools = asynchandler(async(req, res) => {
-    const schools = await School.find().lean().exec()
-
-    if (!schools?.length) {
-        return res.status(400).json({ message: 'No school found.' })
-    }
-    
-    res.json(schools)
-}) 
-
 //@desc Create new school
 //@route POST /schools
 //access Private 
@@ -28,7 +15,7 @@ const createNewSchool = asynchandler(async(req, res) => {
     const duplicate = await School.findOne({ name: name }).lean().exec()
 
     if (duplicate) {
-        return res.status(409).json({ message: 'School already exists.' })
+        return res.status(409).json({ message: 'Institute already exists.' })
     }
 
     const schoolObj = { name, contact, code }
@@ -36,7 +23,7 @@ const createNewSchool = asynchandler(async(req, res) => {
     const school = await School.create(schoolObj)
 
     if (school) {
-        res.status(200).json({ message: `New school ${school.name} with Id ${school._id} created.` })
+        res.status(200).json({ message: `New Institute ${school.name} created.` })
     }
 }) 
 
@@ -71,6 +58,21 @@ const updateSchool = asynchandler(async(req, res) => {
     if (updatedSchool) {
         res.status(200).json({ message: `School ${updatedSchool.name} with Id ${updatedSchool._id} updated.` })
     }
+})  
+
+//--------------------------------Not Needed-----------------------------------//
+
+//@desc Get all schools
+//@route POST /schools
+//access Private 
+const getAllSchools = asynchandler(async(req, res) => {
+    const schools = await School.find().lean().exec()
+
+    if (!schools?.length) {
+        return res.status(400).json({ message: 'No school found.' })
+    }
+    
+    res.json(schools)
 }) 
 
 //@desc Delete a school
@@ -96,7 +98,9 @@ const deleteSchool = asynchandler(async(req, res) => {
     } else {
         res.status(400).json({ message: 'Some error occured.' })
     }
-}) 
+})
+
+//-----------------------------------------------------------------------------//
 
 module.exports = {
     getAllSchools,

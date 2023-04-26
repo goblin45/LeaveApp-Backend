@@ -23,20 +23,6 @@ const getStudent = asynchandler(async(req, res) => {
     res.status(200).json({ id: student[0].id, name: student[0].name, inst_name: student[0].inst_name })
 })
 
-
-//@desc Get all students
-//@route GET /students
-//@access Private
-const getAllStudents = asynchandler(async(req, res) => {
-    const students = await Student.find().select('-password').lean()
-
-    if (!students?.length) {
-        return res.status(400).json({ message: 'No students found!'})
-    }
-
-    res.json(students)
-})
-
 //@desc Create new user
 //@route POST /students
 //@access Private
@@ -154,6 +140,7 @@ const deleteStudent = asynchandler(async(req, res) => {
 
 })
 
+//------------------------------Custom Methods--------------------------------//
 
 //Path POST /students/sameschooladmins 
 const getSameSchoolAdmins = asynchandler(async(req, res) => {
@@ -177,6 +164,23 @@ const getSameSchoolAdmins = asynchandler(async(req, res) => {
 
     res.status(200).json(admins)
 })
+
+//--------------------------------Not Needed-----------------------------------//
+
+//@desc Get all students
+//@route GET /students
+//@access Private
+const getAllStudents = asynchandler(async(req, res) => {
+    const students = await Student.find().select('-password').lean()
+
+    if (!students?.length) {
+        return res.status(400).json({ message: 'No students found!'})
+    }
+
+    res.json(students)
+})
+
+//-----------------------------------------------------------------------------//
 
 module.exports = { 
     getStudent,

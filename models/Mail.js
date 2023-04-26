@@ -14,19 +14,25 @@ const mailSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        sender: {
+        senderId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Student",
             required: true
         },
-        receiver: {
+        receiverId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Admin",
             required: true
         },
+        senderName: {
+            type: String
+        },
+        receiverName: {
+            type: String
+        },
         status: {
             type: String,
-            default: "pending"
+            default: "Pending"
         }
     },
     {

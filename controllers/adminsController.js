@@ -3,7 +3,6 @@ const School = require('../models/School')
 const asynchandler = require('express-async-handler')
 const bcrypt = require('bcrypt')
 
-
 //@desc Get one admin
 //@route POST /admins/find
 //@access Private
@@ -20,21 +19,8 @@ const getAdmin = asynchandler(async(req, res) => {
 
     console.log(admin[0])
 
-    res.status(200).json({ id: admin[0].id, name: admin[0].name, inst_name: admin[0].inst_name, code: school.code})
+    res.status(200).json({ id: admin[0].id, name: admin[0].name, inst_id: school._id, inst_name: admin[0].inst_name, contact: school.contact, code: school.code})
 }) 
-
-//@desc Get all admins
-//@route GET /admins
-//@access Private
-const getAllAdmins = asynchandler(async(req, res) => {
-    const admins = await Admin.find().select('-password').lean()
-
-    if (!admins?.length) {
-        res.status(400).json({ message: 'No Admins found!'})
-    }
-
-    res.json(admins)
-})
 
 //@desc Create new admin
 //@route POST /admins
@@ -157,6 +143,23 @@ const deleteAdmin = asynchandler(async(req, res) => {
 
     res.status(200).json({ name: result.name })
 })
+
+//--------------------------------Not Needed-----------------------------------//
+
+//@desc Get all admins
+//@route GET /admins
+//@access Private
+const getAllAdmins = asynchandler(async(req, res) => {
+    const admins = await Admin.find().select('-password').lean()
+
+    if (!admins?.length) {
+        res.status(400).json({ message: 'No Admins found!'})
+    }
+
+    res.json(admins)
+})
+
+//-----------------------------------------------------------------------------//
 
 module.exports = {
     getAdmin,
