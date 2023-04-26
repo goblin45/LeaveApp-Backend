@@ -11,4 +11,7 @@ router.route('/')
 router.route('/sameschooladmins')
     .post(studentsController.getSameSchoolAdmins)
 
+router.route('/find')
+    .post(studentsController.getStudent)
+
 module.exports = router

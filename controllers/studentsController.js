@@ -5,6 +5,25 @@ const Mail = require('../models/Mail')
 const asynchandler = require('express-async-handler')
 const bcrypt = require('bcrypt')
 
+//@desc Get one student
+//@route POST /students/find
+//@access Private
+const getStudent = asynchandler(async(req, res) => {
+    const { _id } = req.body
+
+    const student = await Student.find({ _id: _id }).lean().exec()
+
+    if (!student?.length) {
+        return res.status(400).json({ message: 'No student found with that Id!' })
+    }
+
+    console.log("check 1")
+    console.log(student)
+    // res.status(200).json({ id: student.id, name: student.name, inst_name: student.inst_name })
+    res.status(200).json({ id: student[0].id, name: student[0].name, inst_name: student[0].inst_name })
+})
+
+
 //@desc Get all students
 //@route GET /students
 //@access Private
@@ -12,8 +31,9 @@ const getAllStudents = asynchandler(async(req, res) => {
     const students = await Student.find().select('-password').lean()
 
     if (!students?.length) {
-        return res.status(400).json({ message: 'No students found!' })
+        return res.status(400).json({ message: 'No students found!'})
     }
+
     res.json(students)
 })
 
@@ -36,7 +56,7 @@ const createNewStudent = asynchandler(async(req, res) => {
     const duplicate = await Student.findOne({ id }).lean().exec()
 
     if (duplicate) {
-        return res.status(409).json({ message: 'Account already exists.' })
+        return res.status(409).json({ message: `An account already exists with this Id in ${inst_name}` })
     }
 
     const hashpwd = await bcrypt.hash(password, 10)
@@ -46,7 +66,7 @@ const createNewStudent = asynchandler(async(req, res) => {
     const student = await Student.create(studentObj)
 
     if (student) {
-        res.status(201).json({ message: `New student ${name} created.`})
+        res.status(200).json({ _id: student._id, name: student.name })
     } else {
         res.status(400).json({ message: 'Invalid data received.' })
     }
@@ -58,29 +78,29 @@ const createNewStudent = asynchandler(async(req, res) => {
 const updateStudent = asynchandler(async(req, res) => {
     const { _id, id, name, password, inst_name } = req.body
 
-    if (!_id || !id || !name || !password || !inst_name) {
-        return res.status(400).json({ message: 'All fields required!' })
+    if (!_id || !id || !name || !inst_name) {
+        return res.status(400).json({ message: 'All fields are required!' })
     }
 
     const student = await Student.findById(_id).exec()
 
     if (!student) {
-        return res.status(400).json({ message: 'Student not found!' })
+        return res.status(400).json({ message: 'Account not found!' })
     }
 
     const school = await School.findOne({ name: inst_name }).exec()
 
     if (!school) {
-        return res.status(400).json({ message: 'School not found!' })
+        return res.status(400).json({ message: 'Institute not found!' })
     }
 
     const duplicate = await Student.findOne({ id: id, inst_name: inst_name }).lean().exec()
 
     if (duplicate && duplicate?._id.toString() !== _id) {
-        return res.status(409).json({ message: 'Duplicate Id found!' })
+        return res.status(409).json({ message: `An account already exists with this Id in ${inst_name}` })
     }
 
-    if (password) {
+    if (password?.length) {
         student.password = await bcrypt.hash(password, 10)
     }
 
@@ -90,42 +110,52 @@ const updateStudent = asynchandler(async(req, res) => {
 
     const updatedStudent = await student.save()
 
-    res.json({ message: `${updatedStudent.name} updated`})
+    res.json({ name: updatedStudent.name })
 })
 
 //@desc Delete student
 //@route DELETE /students
 //@access Private
 const deleteStudent = asynchandler(async(req, res) => {
-    const { _id } = req.body
+    const { _id, password } = req.body
 
-    if (!_id) {
-        return res.status(400).json({ message: 'User Id required.' })
+    if (!_id || !password) {
+        return res.status(400).json({ message: 'Please enter your password to confirm.' })
     }
 
-    const student = await Student.findById(_id).exec()
+    const student = await Student.find({ _id: _id }).exec()
 
-    if (!student) {
-        return res.status(400).json({ message: 'Student not found!' })
+    if (!student?.length) {
+        return res.status(400).json({ message: 'Account not found!' })
     }
 
-    const mails = await Mail.deleteMany({ sender: student._id })
+    console.log(student)
+
+    const match = await bcrypt.compare(password, student[0].password)
+
+    if (!match) {
+        return res.json(400).json({ message: "Incorrect password." })
+    }
+
+    const mails = await Mail.deleteMany({ sender: student[0]._id })
 
     //delete all the mails sent by this student
 
 
-    if (!mails) {
+    if (!mails?.length) {
         console.log('Student had no mails.')
     } else {
         console.log('All mails of this student are deleted.')
     }
 
-    const result = await student.deleteOne()
+    const result = await student[0].deleteOne()
 
-    res.status(200).json(`Student ${student.name} with Id ${result._id} deleted.`)
+    res.status(200).json({ name: result.name })
 
 })
 
+
+//Path POST /students/sameschooladmins 
 const getSameSchoolAdmins = asynchandler(async(req, res) => {
     const { _id } = req.body
 
@@ -149,6 +179,7 @@ const getSameSchoolAdmins = asynchandler(async(req, res) => {
 })
 
 module.exports = { 
+    getStudent,
     getAllStudents,
     createNewStudent,
     updateStudent,

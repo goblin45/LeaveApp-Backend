@@ -3,6 +3,26 @@ const School = require('../models/School')
 const asynchandler = require('express-async-handler')
 const bcrypt = require('bcrypt')
 
+
+//@desc Get one admin
+//@route POST /admins/find
+//@access Private
+const getAdmin = asynchandler(async(req, res) => {
+    const { _id } = req.body
+
+    const admin = await Admin.find({ _id: _id }).exec()
+
+    if (!admin?.length) {
+        return res.status(400).json({ message: 'No admin found with that Id!' })
+    }
+
+    const school = await School.findOne({ name: admin[0].inst_name }).exec()
+
+    console.log(admin[0])
+
+    res.status(200).json({ id: admin[0].id, name: admin[0].name, inst_name: admin[0].inst_name, code: school.code})
+}) 
+
 //@desc Get all admins
 //@route GET /admins
 //@access Private
@@ -29,7 +49,7 @@ const createNewAdmin = asynchandler(async(req, res) => {
     const school = await School.findOne({ name: inst_name }).exec()
 
     if (!school) {
-        return res.status(400).json({ message: 'School not found.' })
+        return res.status(400).json({ message: 'Institute not found.' })
     } else if (code !== school.code) {
         return res.status(400).json({ message: 'Institute code didn\'t match.' })
     }
@@ -37,17 +57,17 @@ const createNewAdmin = asynchandler(async(req, res) => {
     const duplicate = await Admin.findOne({ id: id, inst_name: inst_name }).lean().exec()
     
     if (duplicate) {
-        return res.status(409).json({ message: 'Duplicate faculty Id found.' })
+        return res.status(409).json({ message: `An admin account already exists with this Id in ${inst_name}` })
     }
 
     const hashpwd = await bcrypt.hash(password, 10)
     
     const adminObj = {id, name, "password": hashpwd, inst_name }
 
-    const admin = Admin.create(adminObj)
+    const admin = await Admin.create(adminObj)
 
     if (admin) {
-        res.status(200).json({ message: `Admin ${name} of institute ${inst_name} created.` })
+        res.status(200).json({ id: admin._id, name: admin.name })
     } else {
         res.status(400).json({ message: 'Invalid data received.' })
     }
@@ -59,48 +79,52 @@ const createNewAdmin = asynchandler(async(req, res) => {
 const updateAdmin = asynchandler(async(req, res) => {
     const { _id, id, name, password, inst_name, code } = req.body
 
+    console.log(_id, id, name, password, inst_name, code)
+
     if (!_id || !id || !name || !password || !inst_name || !code) {
         return res.status(400).json({ message: 'All fields are required.' })
     }
 
-    const admin = await Admin.findById(_id).exec()
+    const admin = await Admin.find({ _id: _id }).exec()
 
-    if (!admin) {
+    if (!admin?.length) {
         return res.status(400).json({ message: 'Admin not found.' })
     }
 
-    if (admin.inst_name !== inst_name) {
-        const school = await School.findOne({ name: inst_name }).exec()
+    console.log(admin)
 
-        if (!school) {
-            return res.status(400).json({ message: 'School not found!' })
-        }
+    const school = await School.findOne({ name: inst_name }).exec()
 
-        if (school.code !== code) {
-            return res.status(400).json({ message: 'Code didn\'t match with the new institute name.' })
-        } 
+    if (!school) {
+        return res.status(400).json({ message: 'Institute not found!' })
+    }
+
+    if (school.code !== code) {
+        return res.status(400).json({ message: 'Code didn\'t match with the institute name.' })
     }
 
     const duplicate = await Admin.findOne({ inst_name: inst_name, id: id })
 
     if (duplicate && duplicate?._id.toString() !== _id) {
-        return res.status(409).json({ message: 'Duplicate admin found.' })
+        return res.status(409).json({ message: `An admin account already exists with this Id in ${inst_name}` })
     }
 
     const hashpwd = await bcrypt.hash(password, 10)
 
-    if (admin.password.toString() !== hashpwd.toString()) {
-        admin.password = hashpwd
+    if (admin[0].password.toString() !== hashpwd.toString()) {
+        admin[0].password = hashpwd
     }
 
-    admin.id = id
-    admin.name = name
-    admin.inst_name = inst_name
+    admin[0].id = id
+    admin[0].name = name
+    admin[0].inst_name = inst_name
 
-    const updatedAdmin = await admin.save()
+    const updatedAdmin = await admin[0].save()
+
+    console.log(updatedAdmin)
 
     if (updatedAdmin) {
-        res.status(200).json({ message: `Admin ${admin.name} with Id ${admin._id} updated.`})
+        res.status(200).json({ name: updatedAdmin.name })
     } else {
         res.status(400).json({ message: 'Invalid data received.' })
     }
@@ -111,28 +135,31 @@ const updateAdmin = asynchandler(async(req, res) => {
 //@route DELETE /admins
 //@access Private
 const deleteAdmin = asynchandler(async(req, res) => {
-    const { _id } = req.body
+    const { _id, password } = req.body
 
-    if (!_id) {
-        return res.status(400).json({ message: 'Admin Id required.' })
+    if (!_id || !password) {
+        return res.status(400).json({ message: 'Please enter your password to confirm.' })
     }
 
-    const admin = await Admin.findById(_id).exec()
+    const admin = await Admin.find({ _id: _id }).exec()
 
-    if (!admin) {
-        return res.status(400).json({ message: 'Admin not found.' })
+    if (!admin?.length) {
+        return res.status(400).json({ message: 'Account not found.' })
     }
 
-    const result = await admin.deleteOne()
+    const match = await bcrypt.compare(password, admin[0].password)
 
-    if (result) { 
-        res.status(200).json({ message: `Admin ${result.name} with Id ${result._id} deleted.` })
-    } else {
-        res.status(400).json({ message: 'Admin couldn\'t be deleted.' })
+    if (!match) {
+        return res.status(400).json({ message: 'Incorrect Password.' })
     }
+
+    const result = await admin[0].deleteOne()
+
+    res.status(200).json({ name: result.name })
 })
 
 module.exports = {
+    getAdmin,
     getAllAdmins,
     createNewAdmin,
     updateAdmin,

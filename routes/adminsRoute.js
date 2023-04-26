@@ -8,4 +8,7 @@ router.route('/')
     .patch(adminsController.updateAdmin)
     .delete(adminsController.deleteAdmin)
 
+router.route('/find')
+    .post(adminsController.getAdmin)
+
 module.exports = router

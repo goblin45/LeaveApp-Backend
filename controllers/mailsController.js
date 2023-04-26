@@ -78,6 +78,8 @@ const deleteMail = asynchandler(async(req, res) => {
         return res.status(400).json({ message: 'No such mail found.' })
     } 
 
+    console.log(mail)
+
     const result = await mail.deleteOne()
 
     if (result) {
@@ -88,7 +90,7 @@ const deleteMail = asynchandler(async(req, res) => {
 //------------------------------Custom Methods--------------------------------//
 
 //@desc Get (pending) mails received by an admin
-//@route GET /mails/admins
+//@route POST /mails/admins
 //@access Private
 const getReceivedMails = asynchandler(async(req, res) => {
     const { _id } = req.body
@@ -103,6 +105,8 @@ const getReceivedMails = asynchandler(async(req, res) => {
         return res.status(400).json({ message: 'No pending mails to show.' })
     }
 
+    console.log(mails)
+
     res.status(200).json(mails)
 })
 
@@ -111,6 +115,8 @@ const getReceivedMails = asynchandler(async(req, res) => {
 //@access Private
 const updateMailStatus = asynchandler(async(req, res) => {
     const { _id, status } = req.body
+
+    console.log(_id, status)
 
     if (!_id || !status) {
         return res.status(400).json({ message: 'All fields are required.' })
@@ -137,23 +143,29 @@ const updateMailStatus = asynchandler(async(req, res) => {
 //@route GET /students/pending
 //@access Private
 const getPendingMails = asynchandler(async(req, res) => {
-    const { _id } = req.body
+    const { senderId } = req.body
 
-    if (!_id) {
-        return res.status(400).json({ message: 'Must provide sender Id.' })
+    if (!senderId) {
+        return res.status(410).json({ message: 'Must provide sender Id.' })
     }
 
-    const mails = await Mail.find({ sender: _id, status: "pending" })
+    console.log("check 1")
+
+    const mails = await Mail.find({ sender: senderId, status: "pending" })
+
+    console.log("check 2")
 
     if(!mails?.length) {
         return res.status(400).json({ message: 'No mails to show.' })
     }
+    
+    console.log(mails)
 
     res.status(200).json(mails)
 })
 
 //@desc Get non-pending mails of a student
-//@route GET /students/pending
+//@route GET /students/nonpending
 //@access Private 
 const getNonPendingMails = asynchandler(async(req, res) => {
     const { _id } = req.body
