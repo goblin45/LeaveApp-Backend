@@ -28,8 +28,8 @@ const createNewMail = asynchandler(async(req, res) => {
         return res.status(400).json({ message: 'All fields are required.' })
     }
 
-    if (body.length > 200 ) {
-        return res.status(400).json({ message: 'Application body is too long. It must be of within 200 characters.' })
+    if (body.length > 300 ) {
+        return res.status(400).json({ message: 'Application body is too long. It must be of within 300 characters.' })
     }
 
     const sender = await Student.find({ _id: senderId }).exec()
@@ -57,8 +57,8 @@ const updateMail = asynchandler(async(req, res) => {
         return res.status(400).json({ message: 'All fields are required.' })
     }
 
-    if (body.length > 200) {
-        return res.status(400).json({ message: 'Application body is too long. It must be of within 200 characters.' })
+    if (body.length > 300) {
+        return res.status(400).json({ message: 'Application body is too long. It must be of within 300 characters.' })
     }
 
     const receiver = await Admin.find({ _id: receiverId }).exec()
@@ -129,7 +129,7 @@ const getReceivedMails = asynchandler(async(req, res) => {
 //@access Private
 const updateMailStatus = asynchandler(async(req, res) => {
     const { _id, status } = req.body
-    
+
     if (!_id || !status) {
         return res.status(400).json({ message: 'All fields are required.' })
     }
