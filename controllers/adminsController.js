@@ -89,10 +89,8 @@ const updateAdmin = asynchandler(async(req, res) => {
         return res.status(409).json({ message: `An admin account already exists with this Id in ${inst_name}` })
     }
 
-    const hashpwd = await bcrypt.hash(password, 10)
-
-    if (admin[0].password.toString() !== hashpwd.toString()) {
-        admin[0].password = hashpwd
+    if (password?.length) {
+        admin.password = await bcrypt.hash(password, 10)
     }
 
     admin[0].id = id
