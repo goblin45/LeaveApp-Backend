@@ -15,8 +15,6 @@ const getMail = asynchandler(async(req, res) => {
         return res.status(400).status({  })
     }
 
-    console.log(mail)
-
     res.status(200).json(mail[0])
 })
 
@@ -29,10 +27,6 @@ const createNewMail = asynchandler(async(req, res) => {
     if (!subject || !days || !body || !senderId || !receiverId) {
         return res.status(400).json({ message: 'All fields are required.' })
     }
-
-    console.log(receiverId)
-    console.log(typeof(body))
-    console.log(body)
 
     if (body.length > 200 ) {
         return res.status(400).json({ message: 'Application body is too long. It must be of within 200 characters.' })
@@ -58,11 +52,15 @@ const createNewMail = asynchandler(async(req, res) => {
 //@access Private
 const updateMail = asynchandler(async(req, res) => {
     const { _id, subject, days, body, receiverId } = req.body
-
-    console.log(_id, subject, days, body, receiverId)
     
     if (!_id || !days || !subject || !body || !receiverId) {
         return res.status(400).json({ message: 'All fields are required.' })
+    }
+
+    console.log(body.length)
+
+    if (body.length > 200) {
+        return res.status(400).json({ message: 'Application body is too long. It must be of within 200 characters.' })
     }
 
     const receiver = await Admin.find({ _id: receiverId }).exec()
