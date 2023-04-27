@@ -57,8 +57,6 @@ const updateMail = asynchandler(async(req, res) => {
         return res.status(400).json({ message: 'All fields are required.' })
     }
 
-    console.log(body.length)
-
     if (body.length > 200) {
         return res.status(400).json({ message: 'Application body is too long. It must be of within 200 characters.' })
     }
@@ -98,8 +96,6 @@ const deleteMail = asynchandler(async(req, res) => {
         return res.status(400).json({ message: 'No such mail found.' })
     } 
 
-    console.log(mail)
-
     const result = await mail.deleteOne()
 
     if (result) {
@@ -125,8 +121,6 @@ const getReceivedMails = asynchandler(async(req, res) => {
         return res.status(200).json({ message: 'No pending mails to show.' })
     }
 
-    console.log(mails)
-
     res.status(200).json(mails)
 })
 
@@ -135,9 +129,7 @@ const getReceivedMails = asynchandler(async(req, res) => {
 //@access Private
 const updateMailStatus = asynchandler(async(req, res) => {
     const { _id, status } = req.body
-
-    console.log(_id, status)
-
+    
     if (!_id || !status) {
         return res.status(400).json({ message: 'All fields are required.' })
     }
@@ -193,8 +185,6 @@ const getNonPendingMails = asynchandler(async(req, res) => {
     if (!mails?.length) {
         return res.status(200).json({ message: 'No mails to show.' })
     }
-
-    console.log(mails)
 
     res.status(200).json(mails)
 })
