@@ -17,9 +17,6 @@ const getStudent = asynchandler(async(req, res) => {
         return res.status(400).json({ message: 'No student found with that Id!' })
     }
 
-    console.log("check 1")
-    console.log(student)
-    // res.status(200).json({ id: student.id, name: student.name, inst_name: student.inst_name })
     res.status(200).json({ id: student[0].id, name: student[0].name, inst_name: student[0].inst_name })
 })
 
@@ -115,8 +112,6 @@ const deleteStudent = asynchandler(async(req, res) => {
         return res.status(400).json({ message: 'Account not found!' })
     }
 
-    console.log(student)
-
     const match = await bcrypt.compare(password, student[0].password)
 
     if (!match) {
@@ -124,15 +119,6 @@ const deleteStudent = asynchandler(async(req, res) => {
     }
 
     const mails = await Mail.deleteMany({ sender: student[0]._id })
-
-    //delete all the mails sent by this student
-
-
-    if (!mails?.length) {
-        console.log('Student had no mails.')
-    } else {
-        console.log('All mails of this student are deleted.')
-    }
 
     const result = await student[0].deleteOne()
 
