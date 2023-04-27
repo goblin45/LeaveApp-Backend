@@ -17,8 +17,6 @@ const getAdmin = asynchandler(async(req, res) => {
 
     const school = await School.findOne({ name: admin[0].inst_name }).exec()
 
-    console.log(admin[0])
-
     res.status(200).json({ id: admin[0].id, name: admin[0].name, inst_id: school._id, inst_name: admin[0].inst_name, contact: school.contact, code: school.code})
 }) 
 
@@ -65,8 +63,6 @@ const createNewAdmin = asynchandler(async(req, res) => {
 const updateAdmin = asynchandler(async(req, res) => {
     const { _id, id, name, password, inst_name, code } = req.body
 
-    console.log(_id, id, name, password, inst_name, code)
-
     if (!_id || !id || !name || !inst_name || !code) {
         return res.status(400).json({ message: 'All fields are required.' })
     }
@@ -76,8 +72,6 @@ const updateAdmin = asynchandler(async(req, res) => {
     if (!admin?.length) {
         return res.status(400).json({ message: 'Admin not found.' })
     }
-
-    console.log(admin)
 
     const school = await School.findOne({ name: inst_name }).exec()
 
@@ -106,8 +100,6 @@ const updateAdmin = asynchandler(async(req, res) => {
     admin[0].inst_name = inst_name
 
     const updatedAdmin = await admin[0].save()
-
-    console.log(updatedAdmin)
 
     if (updatedAdmin) {
         res.status(200).json({ name: updatedAdmin.name })
