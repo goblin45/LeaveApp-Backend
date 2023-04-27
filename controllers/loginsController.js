@@ -22,8 +22,6 @@ const getStudentId = asynchandler(async(req, res) => {
         return res.status(400).json({ message: 'Password didn\'t match.' })
     }
 
-    console.log(student._id)
-
     res.status(200).json({ id: student._id, name: student.name })
 })
 
