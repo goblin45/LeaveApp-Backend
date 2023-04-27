@@ -67,7 +67,7 @@ const updateAdmin = asynchandler(async(req, res) => {
 
     console.log(_id, id, name, password, inst_name, code)
 
-    if (!_id || !id || !name || !password || !inst_name || !code) {
+    if (!_id || !id || !name || !inst_name || !code) {
         return res.status(400).json({ message: 'All fields are required.' })
     }
 
